@@ -6,10 +6,6 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HtmlToDocx", "HtmlToDocx.csproj", "{5206B6E5-81BC-4A3B-8620-C4A21C14EC8D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{ED1B5F35-C168-4720-B559-29A162224ACC}"
-	ProjectSection(SolutionItems) = preProject
-		HtmlInput.cs = HtmlInput.cs
-		HTMLPage1.html = HTMLPage1.html
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

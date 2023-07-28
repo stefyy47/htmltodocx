@@ -1,10 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
-using DocumentFormat.OpenXml.Packaging;
-using OpenXmlPowerTools;
-using System.Xml.Linq;
-using Microsoft.AspNetCore.Html;
 using System.Text;
 using Aspose.Words;
+using SautinSoft.Document;
+using SautinSoft;
+using System;
 
 namespace HtmlToDocx.Controllers
 {
@@ -12,55 +11,47 @@ namespace HtmlToDocx.Controllers
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
     {
-        private static readonly string[] Summaries = new[]
+     
+        public WeatherForecastController()
         {
-        "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-    };
-
-        private readonly ILogger<WeatherForecastController> _logger;
-
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
-        {
-            _logger = logger;
         }
 
         [HttpPost]
-        [Route("/OpenXmlPowerTools")]
+        [Route("/SautinSoft")]
         public IActionResult ConvertHtmlToDocx([FromBody] string html)
         {
-            HtmlToWmlConverterSettings settings = new HtmlToWmlConverterSettings();
+            DocumentCore dc = DocumentCore.Load(new MemoryStream(Encoding.UTF8.GetBytes(html)), new HtmlLoadOptions());
 
-            XElement htmlAsXElement = XElement.Parse(html);
+            MemoryStream outputStream = new MemoryStream();
+            dc.Save(outputStream, new DocxSaveOptions());
+            outputStream.Position = 0;
 
-            WmlDocument convertedDocument = HtmlToWmlConverter.ConvertHtmlToWml(
-                "",
-                "",
-                "",
-                htmlAsXElement,
-                settings);
+            return File(outputStream, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "output.docx");
+        }
 
-            byte[] byteArray = convertedDocument.DocumentByteArray;
-            return File(byteArray, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "output.docx");
+        [HttpPost]
+        [Route("/SautinSoft/2")]
+        public IActionResult ConvertHtmlToDocx2([FromBody] string html)
+        {
+            HtmlToRtf h = new HtmlToRtf();
+            byte[] byteArray = Encoding.UTF8.GetBytes(html);
+            MemoryStream stream = new MemoryStream(byteArray);
+            h.OpenHtml(stream);
+            MemoryStream outputStream = new MemoryStream();
+            h.ToDocx(outputStream);
+            outputStream.Position = 0;
+            return File(outputStream, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "Output.docx");
         }
 
         [HttpPost]
         [Route("/Aspose")]
-        public async Task<IActionResult> ConvertHtmlToDocxAspose([FromForm] IFormFile htmlFile)
+        public IActionResult ConvertHtmlToDocxAspose([FromBody] string html)
         {
-            byte[] result;
-            using (MemoryStream stream = new MemoryStream())
-            {
-                await htmlFile.CopyToAsync(stream);
-                stream.Seek(0, SeekOrigin.Begin);
-                Document doc = new Document(stream);
-                using (MemoryStream outputStream = new MemoryStream())
-                {
-                    doc.Save(outputStream, SaveFormat.Docx);
-                    outputStream.Seek(0, SeekOrigin.Begin);
-                    result = outputStream.ToArray();
-                }
-            }
-            return File(result, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "output.docx");
+            Document doc = new Document(new MemoryStream(Encoding.UTF8.GetBytes(html)));
+            var memory = new MemoryStream();
+            doc.Save(memory, SaveFormat.Docx);
+            memory.Position = 0;
+            return File(memory, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "output.docx");
         }
     }
 }
